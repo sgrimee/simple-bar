@@ -32,8 +32,9 @@ const Component = React.memo(() => {
 
   // Find the focused space on the current display
   const { windows = [] } =
-    spaces.find((space) => space.focused && space.monitor === displayIndex) ||
-    {};
+    spaces.find((space) => space.focused) || {};
+    // spaces.find((space) => space.focused && space.monitor === displayIndex) || {};
+
 
   if (!windows.length) return null;
 
