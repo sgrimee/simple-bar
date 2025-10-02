@@ -14,7 +14,7 @@ const { React } = Uebersicht;
 const DEFAULT_REFRESH_FREQUENCY = 20000;
 
 /**
- * Wifi widget component.
+ * Wifi widget component showing IP address.
  * @returns {JSX.Element|null} The Wifi widget.
  */
 export const Widget = React.memo(() => {
@@ -51,23 +51,19 @@ export const Widget = React.memo(() => {
   };
 
   /**
-   * Fetches the wifi status and SSID.
+   * Fetches the wifi status and IP address.
    */
   const getWifi = React.useCallback(async () => {
     if (!visible) return;
-    const [status, ssid] = await Promise.all([
-      Utils.cachedRun(
-        `ifconfig ${networkDevice} | grep status | cut -c 10-`,
-        refresh,
-      ),
-      Utils.cachedRun(
-        `system_profiler SPAirPortDataType | awk '/Current Network/ {getline;$1=$1;print $0 | "tr -d ':'";exit}'`,
-        refresh,
+    const [status, ipAddress] = await Promise.all([
+      Uebersicht.run(`ifconfig ${networkDevice} | grep status | cut -c 10-`),
+      Uebersicht.run(
+        `ifconfig ${networkDevice} | grep 'inet ' | awk '{print $2}' | head -1`,
       ),
     ]);
     setState({
       status: Utils.cleanupOutput(status),
-      ssid: Utils.cleanupOutput(ssid),
+      ssid: Utils.cleanupOutput(ipAddress),
     });
     setLoading(false);
   }, [networkDevice, visible, refresh]);
@@ -141,14 +137,17 @@ function openWifiPreferences(e) {
 }
 
 /**
- * Renders the wifi network name.
- * @param {string} name - The network name.
- * @param {boolean} hideNetworkName - Whether to hide the network name.
- * @returns {string} The rendered network name.
+ * Renders the wifi IP address.
+ * @param {string} ipAddress - The IP address.
+ * @param {boolean} hideNetworkName - Whether to hide the network info.
+ * @returns {string} The rendered IP address or status.
  */
-function renderName(name, hideNetworkName) {
-  if (!name || hideNetworkName) return "";
-  if (name === "with an AirPort network.y off.") return "Disabled";
-  if (name === "with an AirPort network.") return "Searching...";
-  return name;
+function renderName(ipAddress, hideNetworkName) {
+  if (hideNetworkName) return "";
+  if (!ipAddress) return "Disconnected";
+  // Check if it's a valid IP address
+  if (ipAddress.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+    return ipAddress;
+  }
+  return "Connected";
 }
