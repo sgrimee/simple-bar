@@ -30,6 +30,7 @@ import * as Stock from "./lib/components/data/stock.jsx";
 import * as Music from "./lib/components/data/music.jsx";
 import * as Mpd from "./lib/components/data/mpd.jsx";
 import * as BrowserTrack from "./lib/components/data/browser-track.jsx";
+import * as DiskUsage from "./lib/components/data/disk-usage.jsx";
 import * as Specter from "./lib/components/data/specter.jsx";
 import * as Graph from "./lib/components/data/graph.jsx";
 import * as DataWidgetLoader from "./lib/components/data/data-widget-loader.jsx";
@@ -118,6 +119,7 @@ Utils.injectStyles("simple-bar-index-styles", [
   Crypto.styles,
   Stock.styles,
   Battery.styles,
+  DiskUsage.styles,
   Wifi.styles,
   ViscosityVPN.styles,
   Keyboard.styles,
@@ -230,11 +232,12 @@ function render({ output, error }) {
           <GitHub.Widget />
           <Weather.Widget />
           <Netstats.Widget />
-          <Cpu.Widget />
-          <Gpu.Widget />
-          <Memory.Widget />
-          <Battery.Widget />
-          <Mic.Widget />
+           <Cpu.Widget />
+           <Gpu.Widget />
+           <Memory.Widget />
+           <Battery.Widget />
+           <DiskUsage.Widget />
+           <Mic.Widget />
           <Sound.Widget />
           <ViscosityVPN.Widget />
           <Wifi.Widget />
