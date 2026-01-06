@@ -43,62 +43,72 @@ export const Widget = React.memo(() => {
     setAvailableGB("--");
   };
 
-  /**
-   * Fetch disk usage information for root partition
-   */
-  const getDiskUsage = React.useCallback(async () => {
-    if (!visible) return;
-    try {
-      // Get available space for root partition using df -h (human readable)
-      const output = await Uebersicht.run(
-        `df -h / | tail -1 | awk '{print $4}'`,
-      );
-      const availableStr = output.trim();
-      
-      // Parse the human readable format (e.g., "68G", "1.5T", "512M")
-      const match = availableStr.match(/^([\d.]+)([KMGT]?)$/);
-      if (!match) {
-        setAvailableGB("--");
-        return;
-      }
+   /**
+    * Fetch disk usage information for root partition
+    */
+   const getDiskUsage = React.useCallback(async () => {
+     if (!visible) return;
+     try {
+       // Get available space for root partition using df -h (human readable)
+       const output = await Uebersicht.run(
+         `df -h / | tail -1 | awk '{print $4}'`,
+       );
+       const availableStr = Utils.cleanupOutput(output);
+       
+       // Validate output is not empty
+       if (!availableStr || availableStr.length === 0) {
+         // eslint-disable-next-line no-console
+         console.error("Disk usage output is empty");
+         setAvailableGB("--");
+         return;
+       }
+       
+       // Parse the human readable format (e.g., "68G", "1.5T", "512M")
+       const match = availableStr.match(/^([\d.]+)([KMGT]?)$/);
+       if (!match) {
+         // eslint-disable-next-line no-console
+         console.error("Failed to parse disk usage output:", availableStr);
+         setAvailableGB("--");
+         return;
+       }
 
-      const value = parseFloat(match[1]);
-      const unit = match[2] || "G";
+       const value = parseFloat(match[1]);
+       const unit = match[2] || "G";
 
-      let availableGB = value;
-      switch (unit) {
-        case "K":
-          availableGB = value / (1024 ** 2);
-          break;
-        case "M":
-          availableGB = value / 1024;
-          break;
-        case "G":
-          availableGB = value;
-          break;
-        case "T":
-          availableGB = value * 1024;
-          break;
-        default:
-          availableGB = value;
-      }
+       let availableGB = value;
+       switch (unit) {
+         case "K":
+           availableGB = value / (1024 ** 2);
+           break;
+         case "M":
+           availableGB = value / 1024;
+           break;
+         case "G":
+           availableGB = value;
+           break;
+         case "T":
+           availableGB = value * 1024;
+           break;
+         default:
+           availableGB = value;
+       }
 
-      setAvailableGB(parseFloat(availableGB.toFixed(1)));
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("Error fetching disk usage:", e);
-      setAvailableGB("--");
-    }
-  }, [visible]);
+       setAvailableGB(parseFloat(availableGB.toFixed(1)));
+     } catch (e) {
+       // eslint-disable-next-line no-console
+       console.error("Error fetching disk usage:", e);
+       setAvailableGB("--");
+     }
+   }, [visible]);
 
   // Use server socket to fetch disk usage data
   useServerSocket("disk-usage", visible, getDiskUsage, resetWidget);
   // Refresh the widget at the specified interval
   useWidgetRefresh(visible, getDiskUsage, refresh);
 
-  if (!visible) return null;
+   if (!visible) return null;
 
-  const isLowDisk = availableGB < LOW_DISK_THRESHOLD;
+   const isLowDisk = typeof availableGB === "number" && availableGB < LOW_DISK_THRESHOLD;
 
   const classes = Utils.classNames("disk-usage", {
     "disk-usage--critical": isLowDisk,
