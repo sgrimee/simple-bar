@@ -1,5 +1,6 @@
 import * as Uebersicht from "uebersicht";
 import * as DataWidget from "./data-widget.jsx";
+import * as Icons from "../icons/icons.jsx";
 import useWidgetRefresh from "../../hooks/use-widget-refresh";
 import useServerSocket from "../../hooks/use-server-socket";
 import { useSimpleBarContext } from "../simple-bar-context.jsx";
@@ -21,7 +22,7 @@ export const Widget = React.memo(() => {
   const { displayIndex, settings } = useSimpleBarContext();
   const { widgets, diskUsageWidgetOptions } = settings;
   const { diskUsageWidget } = widgets;
-  const { refreshFrequency, showOnDisplay } = diskUsageWidgetOptions;
+  const { refreshFrequency, showOnDisplay, showIcon } = diskUsageWidgetOptions;
 
   // Determine if the widget should be visible based on display settings
   const visible =
@@ -117,6 +118,7 @@ export const Widget = React.memo(() => {
   return (
     <DataWidget.Widget
       classes={classes}
+      Icon={showIcon ? Icons.Disk : null}
       disableSlider
     >
       <span className="disk-usage__text">

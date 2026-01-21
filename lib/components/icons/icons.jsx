@@ -87,6 +87,7 @@ export const CPU = React.lazy(() => import("./library/cp-u.jsx"));
 export const Cursor = React.lazy(() => import("./library/cursor.jsx"));
 export const DataGrip = React.lazy(() => import("./library/data-grip.jsx"));
 export const Date = React.lazy(() => import("./library/date.jsx"));
+export const Disk = React.lazy(() => import("./library/disk.jsx"));
 export const Deezer = React.lazy(() => import("./library/deezer.jsx"));
 export const Desktop = React.lazy(() => import("./library/desktop.jsx"));
 export const DEVONthink3 = React.lazy(
